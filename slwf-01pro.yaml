@@ -1,0 +1,103 @@
+# These substitutions allow the end user to override certain values
+substitutions:
+  name: air-conditioner
+  friendly_name: "Air Conditioner"
+  
+  # Additional substitutions could be added here to make it really easy for the user to override defaults.
+  # I am adding a some for example purposes.
+  wifi_ap_ssid: "AC-wifi"
+  wifi_ap_password: "slwf01pro"
+  
+  midea_beeper: true
+  visual_min_temperature: "17 °C"
+  visual_max_temperature: "30 °C"
+  visual_temperature_step: "0.5 °C"
+  
+
+esphome:
+  name: "${name}"
+  # Friendly names are used where appropriate in Home Assistant
+  friendly_name: "${friendly_name}"
+  # Automatically add the mac address to the name
+  # so you can use a single firmware for all devices
+  name_add_mac_suffix: true
+
+  # This will allow for (future) project identification,
+  # configuration and updates.
+  project:
+    name: smartlight.slwf-01pro
+    version: "1.0"
+
+  platform: ESP8266
+  board: esp12e
+
+# This should point to the public location of this yaml file.
+dashboard_import:
+  package_import_url: github://genebean/smartlight-slwf-01pro/slwf-01pro.yaml@v1
+  import_full_config: false # or true
+
+wifi:
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "${wifi_ap_ssid}"
+    password: "${wifi_ap_password}"
+
+captive_portal:
+
+# Enable logging
+logger:
+  baud_rate: 0
+
+# Enable Home Assistant API
+api:
+
+ota:
+
+uart:
+  tx_pin: 1
+  rx_pin: 3
+  baud_rate: 9600
+  
+  
+climate:
+  - platform: midea
+    name: ""                                          # The value of "friendly_name" will be used here
+    period: 1s                                        # Optional
+    timeout: 2s                                       # Optional
+    num_attempts: 3                                   # Optional
+    autoconf: true                                    # Autoconfigure most options.
+    beeper: ${midea_beeper}                           # Beep on commands.
+    visual:                                           # Optional. Example of visual settings override.
+      min_temperature: "${visual_min_temperature}"    # min: 17
+      max_temperature: "${visual_max_temperature}"    # max: 30
+      temperature_step: "${visual_temperature_step}"  # min: 0.5
+    supported_modes:                                  # All capabilities in this section detected by autoconf.
+      - FAN_ONLY                                      # This capability is always used.
+      - HEAT_COOL
+      - COOL
+      - HEAT
+      - DRY
+    custom_fan_modes:
+      - SILENT
+      - TURBO
+    supported_presets:          # All capabilities in this section detected by autoconf.
+      - ECO
+      - BOOST
+      - SLEEP                   # This capability is always used.
+    custom_presets:             # All capabilities in this section detected by autoconf.
+      - FREEZE_PROTECTION
+    supported_swing_modes:
+      - VERTICAL                # This capability is always used.
+      - HORIZONTAL
+      - BOTH
+    outdoor_temperature:        # Optional. Outdoor temperature sensor (may display incorrect values after long inactivity).
+      name: Temp
+    power_usage:                # Optional. Power usage sensor (only for devices that support this feature).
+      name: Power
+    humidity_setpoint:          # Optional. Indoor humidity sensor (only for devices that support this feature).
+      name: Humidity
+
+
+web_server:
+  port: 80
